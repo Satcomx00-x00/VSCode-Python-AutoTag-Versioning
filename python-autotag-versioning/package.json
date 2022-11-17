@@ -16,7 +16,7 @@
   "contributes": {
     "commands": [{
       "command": "python-autotag-versioning.helloWorld",
-      "title": "Hello World"
+      "title": "Auto Tag Versioning: Python"
     }]
   },
   "scripts": {

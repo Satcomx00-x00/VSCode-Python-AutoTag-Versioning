@@ -10,20 +10,17 @@ const vscode = require('vscode');
  */
 function activate(context) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "python-autotag-versioning" is now active!');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
 	let disposable = vscode.commands.registerCommand('python-autotag-versioning.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Python-AutoTag-Versioning!');
+		// make a button link to the github repo website in the vscode notification^
+		vscode.window.showInformationMessage('Python Autotag Versioning is now active! ^_^', 'Github').then(selection => {
+			if (selection === 'Github') {
+				vscode.env.openExternal(vscode.Uri.parse('https://github.com/Satcomx00-x00/VSCode-Python-AutoTag-Versioning'));
+			}
+		})
 	});
-
 	context.subscriptions.push(disposable);
 	// Python-AutoTag-Versioning, is a tool to automatically update the __version__ variable with an automatic increment, following the Breaking.Feature.Fix.Update method (1.3.2.120).
 
@@ -97,27 +94,19 @@ function activate(context) {
 			let document = editor.document;
 			if (isPythonFile(document)) {
 				vscode.window.showInformationMessage('Python file detected');
-				// if __version__ is empty, set the only the content of this variable to 0.0.0.0 else get the version and add 1 to the last number^
-				if (hasVersionString(document)) {
-					vscode.window.showInformationMessage('Variable __version__ detected');
-					setVersionToZero(document);
-					let version = getVersion(document);
-					let versionList = getVersionList(version);
-					vscode.window.showInformationMessage('Current version: ' + version);
-
-					versionList[3] = parseInt(versionList[3]) + 1;
-					let newVersion = versionList.join('.');
-					let text = document.getText();
-					let range = document.getWordRangeAtPosition(editor.selection.active, /__version__\s*=\s*['"]([^'"]*)['"]/);
-					editor.edit(editBuilder => {
-						editBuilder.replace(range, "__version__ = \'" + newVersion + "\'")
-					});
-					console.log('Current version: ' + version);
-					console.log('Version updated to ' + newVersion);
-					vscode.window.showInformationMessage('Version updated to ' + newVersion);
+				// if __version__ is empty, set the only the content of this variable to 0.0.0.0 else get the version and add 1 to the last number, change the version in the file can be done wherever the cursor is^^
+				let text = document.getText();
+				let version = text.match(/__version__\s*=\s*['"]([^'"]*)['"]/)[1];
+				let range = document.getWordRangeAtPosition(editor.selection.active, /__version__\s*=\s*['"]([^'"]*)['"]/);
+				let versionArray = version.split('.');
+				let versionUpdate = parseInt(versionArray[3]);
+				versionUpdate++;
+				let newVersion = versionArray[0] + '.' + versionArray[1] + '.' + versionArray[2] + '.' + versionUpdate;
+				editor.edit(editBuilder => {
+					editBuilder.replace(range, "__version__ = \'" + newVersion + "\'")
 				}
+				);
 			}
-			vscode.window.showInformationMessage('Incrementing Version!');
 		}
 		catch (error) {
 			console.log(error);
@@ -127,7 +116,7 @@ function activate(context) {
 
 
 
-}
+});
 
 // This method is called when your extension is deactivated
 function deactivate() { }
@@ -135,7 +124,11 @@ function deactivate() { }
 module.exports = {
 	activate,
 	deactivate,
-	isPythonFile, hasVersionString, getVersion, getVersionList, setVersionToZero
+	isPythonFile,
+	hasVersionString,
+	getVersion,
+	getVersionList,
+	setVersionToZero
 
 }
 
